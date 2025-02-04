@@ -1,10 +1,39 @@
 ﻿using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerMovement : MonoBehaviour
 {
     bool canMove;
     Vector3 offset;
     public float minX, minY, maxX, maxY;
+    public GameObject boundaryObject;
+    SpriteRenderer spriteRenderer;
+    Vector2 spriteSize;
+    Rigidbody2D rb;
+
+    void Start()
+    {   
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
+        if (spriteRenderer != null)
+        {
+            spriteSize = spriteRenderer.bounds.size;
+            Debug.Log("Sprite Size: " + spriteSize);
+        }
+        else
+        {
+            Debug.LogError("No SpriteRenderer Found");
+        }
+        Debug.Log(boundaryObject.name);
+        if(boundaryObject != null)
+        {
+            CalculateBoundary();
+        }
+        else
+        {
+            Debug.LogError("Boundary Object not assigned!");
+        }
+    }
 
     void Update()
     {
@@ -30,11 +59,27 @@ public class PlayerMovement : MonoBehaviour
             newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
 
             transform.position = newPosition;
+            rb.MovePosition(newPosition);
         }
 
         if (Input.GetMouseButtonUp(0)) // Release mouse
         {
             canMove = false;
+        }
+
+    }
+
+    void CalculateBoundary()
+    {
+        SpriteRenderer boundarySprite = boundaryObject.GetComponent<SpriteRenderer>();
+
+        if (boundarySprite != null)
+        {
+            Bounds boundaryBounds = boundarySprite.bounds;
+            minX = boundaryBounds.min.x + spriteSize.x / 2;
+            maxX = boundaryBounds.max.x - spriteSize.x / 2;
+            minY = boundaryBounds.min.y + spriteSize.y / 2;
+            maxY = boundaryBounds.center.y - spriteSize.y / 2;
         }
     }
 }
